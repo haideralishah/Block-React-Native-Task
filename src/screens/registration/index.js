@@ -1,5 +1,4 @@
 import * as React from "react";
-import { connect } from "react-redux";
 import { TouchableOpacity, ScrollView } from "react-native";
 import {
   Container,

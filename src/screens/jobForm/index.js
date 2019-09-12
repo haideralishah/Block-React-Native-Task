@@ -1,19 +1,24 @@
 import * as React from "react";
-import { connect } from "react-redux";
-import { ScrollView } from "react-native";
+import { ScrollView, TouchableOpacity } from "react-native";
 import {
   Container,
   Header,
   Title,
   Body,
+  Left,
+  Text
 } from "native-base";
+import { withNavigation } from 'react-navigation';
 import JobForm from "../../containers/jobForm";
 
 const Form = props => {
   return (
     <Container style={{ backgroundColor: "#FBFAFA" }}>
       <Header style={{ backgroundColor: 'white' }}>
-        <Body style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Left style={{ width: '20%' }}>
+          <TouchableOpacity onPress={() => props.navigation.navigate('List')}><Text style={{ fontWeight: '600' }}>Back</Text></TouchableOpacity>
+        </Left>
+        <Body style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center', width: '60%', marginRight: '20%' }}>
           <Title style={{ color: "#000", fontSize: 20, fontWeight: '600' }}>Create Job</Title>
         </Body>
       </Header>
@@ -24,4 +29,4 @@ const Form = props => {
   )
 }
 
-export default Form;
+export default withNavigation(Form);

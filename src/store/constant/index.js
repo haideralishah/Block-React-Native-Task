@@ -1,6 +1,6 @@
 const ActionTypes = {
-    NAME: 'NAME',
-    // USER_NUMBER: 'USER_NUMBER'
+    USER: 'USER',
+    LIST: 'LIST',
 }
 
 export default ActionTypes;

@@ -20,11 +20,10 @@ const Navigation = createStackNavigator(
     }
   },
   {
-    initialRouteName: "Login",
+    initialRouteName: "List",
     headerMode: "none",
   }
 )
 
-// export default Form;
 const App = createAppContainer(Navigation);
 export default App;

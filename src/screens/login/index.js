@@ -1,5 +1,4 @@
 import * as React from "react";
-import { connect } from "react-redux";
 import { TouchableOpacity, ScrollView } from "react-native";
 import {
   Container,
@@ -12,7 +11,6 @@ import {
 import { withNavigation } from 'react-navigation';
 import LoginForm from "../../containers/login";
 
-// class Login extends React.Component {
 const Login = props => {
   return (
     <Container style={{ backgroundColor: "#FBFAFA" }}>
