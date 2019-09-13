@@ -1,13 +1,14 @@
 
+import { AsyncStorage } from 'react-native';
 import ActionTypes from '../constant';
 
 function fetchFunc(url, data) {
     return new Promise(function (res, rej) {
         fetch(url, {
             method: 'POST',
-            body: data ? data : null,
+            body: data ? JSON.stringify(data) : null,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             }
         }).then(res => res.json())
             .then(response => {
@@ -21,17 +22,45 @@ function fetchFunc(url, data) {
     })
 }
 
+
+//Auth Checking Action Function 
+
+export function authCheck() {
+    return dispatch => {
+        return new Promise(async function (resolve, reject) {
+            try {
+                const value = await AsyncStorage.getItem('user');
+                if (value !== null) {
+                    console.log(value);
+                    dispatch({ type: ActionTypes.USER, payload: JSON.parse(value) })
+                    resolve();
+                }
+                else {
+                    reject();
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    }
+}
+
 //Login Action Function 
 
 export function signin(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
             console.log('Register', data);
-            var url = 'http://localhost:5000/user/signIn';
+            var url = 'http://192.168.100.55:5000/user/signIn';
             fetchFunc(url, data)
                 .then((response) => {
-                    dispatch({ type: ActionTypes.USER, payload: data })
-                    resolve();
+                    if (response.message) {
+                        reject();
+                    } else {
+                        AsyncStorage.setItem('user', JSON.stringify(response));
+                        dispatch({ type: ActionTypes.USER, payload: response })
+                        resolve();
+                    }
                 })
                 .catch(() => {
                     reject();
@@ -47,11 +76,17 @@ export function register(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
             console.log('Register', data);
-            var url = 'http://localhost:5000/user/register';
+            var url = 'http://192.168.100.55:5000/user/register';
             fetchFunc(url, data)
                 .then((response) => {
-                    dispatch({ type: ActionTypes.USER, payload: data })
-                    resolve();
+                    if (response.message) {
+                        reject();
+                    }
+                    else {
+                        AsyncStorage.setItem('user', JSON.stringify(response));
+                        dispatch({ type: ActionTypes.USER, payload: data })
+                        resolve();
+                    }
                 })
                 .catch(() => {
                     reject();
@@ -66,7 +101,7 @@ export function createJob(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
             console.log('Create Job', data);
-            var url = 'http://localhost:5000/jobs/add';
+            var url = 'http://192.168.100.55:5000/jobs/add';
             fetchFunc(url, data)
                 .then(() => {
                     resolve();
@@ -84,34 +119,62 @@ export function getList(id) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
             console.log('ID', id);
-            var url = `http://localhost:5000/jobs/get/${id}`;
-            fetchFunc(url, null)
-                .then((response) => {
-                    // dispatch({ type: ActionTypes.LIST, payload: [] })
-                    resolve();
+            var url = `http://192.168.100.55:5000/jobs/get/${id}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+                .then(response => {
+                    console.log('Success:', response);
+                    dispatch({ type: ActionTypes.LIST, payload: response })
+                    resolve({ data: response.length ? response : '' });
                 })
-                .catch(() => {
+                .catch(error => {
+                    console.error('Error:', error);
                     reject();
-                })
+                });
         })
     }
 }
 
 //Add Job Function 
 
-export function deleteJob(data) {
+export function deleteJob(id, list) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            // console.log('Delete Id', id);
-            dispatch({ type: ActionTypes.LIST, payload: data })
-            // var url = 'http://localhost:5000/jobs/delete';
-            // fetchFunc(url, null)
-            //     .then(() => {
-            //         resolve();
-            //     })
-            //     .catch(() => {
-            //         reject();
-            //     })
+            console.log('Delete Id', id, list);
+            dispatch({ type: ActionTypes.LIST, payload: list })
+            var url = 'http://192.168.100.55:5000/jobs/delete';
+            fetch(url, {
+                method: 'DELETE',
+                body: JSON.stringify({ jobId: id }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+                .then(response => {
+                    console.log('Success:', response);
+                    dispatch({ type: ActionTypes.LIST, payload: list })
+                    resolve();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    reject();
+                });
+        })
+    }
+}
+
+//Logout Action Function 
+
+export function logout() {
+    return dispatch => {
+        return new Promise(function (resolve, reject) {
+            AsyncStorage.removeItem('user');
+            dispatch({ type: ActionTypes.USER, payload: '' })
+            resolve();
         })
     }
 }

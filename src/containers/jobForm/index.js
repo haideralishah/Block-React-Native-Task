@@ -13,16 +13,15 @@ class JobForm extends React.Component {
     this.state = {
       title: '',
       designation: '',
-      location: '',
-      salary: '',
-      time: '',
+      description: '',
     }
   }
 
   _Create = () => {
-    const { title, designation, location, salary, time } = this.state;
-    if (title && designation && location && salary && time) {
-      this.props.actions.createJob({ title, designation, location, salary, time })
+    const { user } = this.props;
+    const { title, designation, description } = this.state;
+    if (title && designation && description) {
+      this.props.actions.createJob({ title, designation, description, uid: user._id })
         .then(() => {
           this.props.navigation.navigate('List')
         })
@@ -40,9 +39,7 @@ class JobForm extends React.Component {
       <View>
         <InputField onChange={(text) => this.setState({ title: text })} placeholder='Title' />
         <InputField onChange={(text) => this.setState({ designation: text })} placeholder='Designation' />
-        <InputField onChange={(text) => this.setState({ location: text })} placeholder='Location' />
-        <InputField onChange={(text) => this.setState({ salary: text })} placeholder='Salary' />
-        <InputField onChange={(text) => this.setState({ time: text })} placeholder='Time' />
+        <InputField onChange={(text) => this.setState({ description: text })} placeholder='Description' />
         <View>
           <AuthButton
             onPress={this._Create}
@@ -54,6 +51,12 @@ class JobForm extends React.Component {
   }
 }
 
+const mapStateToProps = state => {
+  return {
+    user: state.reducer.USER
+  };
+};
+
 const mapDispatchToProps = (dispatch) => {
   return {
     actions: bindActionCreators({
@@ -61,4 +64,4 @@ const mapDispatchToProps = (dispatch) => {
     }, dispatch),
   }
 }
-export default connect(null, mapDispatchToProps)(withNavigation(JobForm));
+export default connect(mapStateToProps, mapDispatchToProps)(withNavigation(JobForm));

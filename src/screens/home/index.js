@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from "react-redux";
 import { bindActionCreators } from 'redux';
-import { SafeAreaView, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import {
   Container,
   Header,
@@ -9,56 +9,18 @@ import {
   Text,
   Body,
   View,
+  Right
 } from "native-base";
-import { withNavigation } from 'react-navigation';
-import { getList, deleteJob } from '../../store/action';
+import { withNavigation, NavigationEvents } from 'react-navigation';
+import { getList, deleteJob, logout } from '../../store/action';
 
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-  },
-];
-
-function Item({ title, onRemove, id }) {
+function Item({ item, onRemove }) {
   return (
     <View style={styles.item}>
       <View style={{ flex: 0.3 }}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{item.title}</Text>
         <TouchableOpacity
-          onPress={() => onRemove(id)}
+          onPress={() => onRemove(item._id)}
           style={{
             width: 22,
             height: 22,
@@ -76,12 +38,10 @@ function Item({ title, onRemove, id }) {
       </View>
       <View style={{ flex: 0.7, flexDirection: 'column' }}>
         <View style={{ width: '100%', height: 25, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={styles.text}>{title}</Text>
-          <Text style={styles.text}>{title}</Text>
+          <Text style={styles.text}>Designation: {item.designation}</Text>
         </View>
         <View style={{ width: '100%', height: 25, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={styles.text}>{title}</Text>
-          <Text style={styles.text}>{title}</Text>
+          <Text style={styles.text}>Description: {item.description}</Text>
         </View>
       </View>
     </View>
@@ -89,33 +49,74 @@ function Item({ title, onRemove, id }) {
 }
 
 class List extends React.Component {
-  _remove = (id) => {
-    console.log('Run', id);
-    const data = this.props.list;
-    var index = data.findIndex(item => id === item.id)
-    if (index !== -1) {
-      console.log('data1', data);
-      data.splice(index, 1)
-      console.log('data2', data);
-      this.props.actions.deleteJob(data);
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
     }
   }
-  render() {
+
+  componentDidMount() {
+    this.fetchData()
+  }
+
+  fetchData = () => {
+    const user = this.props.user;
+    if (user && user._id) {
+      this.props.actions.getList(user._id)
+        .then((res) => {
+          this.setState({ data: res.data })
+        })
+    }
+    else {
+      this.setState({ data: null })
+    }
+  }
+
+  _remove = (id) => {
     const data = this.props.list;
-    console.log('This.Props', this.props)
+    console.log('id***', id, data);
+    var index = data.findIndex(item => id === item._id)
+    if (index !== -1) {
+      this.props.actions.deleteJob(data[index]._id, data);
+      data.splice(index, 1)
+      this.setState({ data: data.length ? data : null })
+    }
+  }
+
+  _Logout = () => {
+    this.props.actions.logout()
+      .then(() => {
+        this.props.navigation.navigate('Login')
+      })
+  }
+  render() {
+    const { data } = this.state;
     return (
       <Container style={{ backgroundColor: "#FBFAFA" }}>
+        <NavigationEvents onDidFocus={() => this.fetchData()} />
         <Header style={{ backgroundColor: 'white' }}>
-          <Body style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Body style={{ justifyContent: 'center', alignItems: 'center', width: '60%', marginLeft: '30%' }}>
             <Title style={{ textAlign: 'center', color: "#000", fontSize: 20, fontWeight: '600' }}>Job List</Title>
           </Body>
+          <Right style={{ width: '20%' }}>
+            <TouchableOpacity style={{ backgroundColor: '#0693E3', paddingHorizontal: 6, paddingVertical: 5, borderRadius: 2 }} onPress={this._Logout}><Text style={{ fontWeight: '600', color: '#FFFFFF' }}>Logout</Text></TouchableOpacity>
+          </Right>
         </Header>
         <SafeAreaView style={styles.container}>
-          <FlatList
-            data={data}
-            renderItem={({ item }) => <Item title={item.title} id={item.id} onRemove={(id) => this._remove(id)} />}
-            keyExtractor={item => item.id}
-          />
+          {
+            data ?
+              data.length ?
+                <FlatList
+                  data={data}
+                  renderItem={({ item }) => <Item item={item} onRemove={(id) => this._remove(id)} />}
+                  keyExtractor={item => item.id}
+                />
+                :
+                <ActivityIndicator size="large" color="#85d2f5" />
+              :
+              <Text style={{ alignSelf: 'center' }}>No data found</Text>
+          }
         </SafeAreaView>
         <TouchableOpacity
           onPress={() => this.props.navigation.navigate('Form')}
@@ -130,8 +131,8 @@ class List extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    list: state.reducer.LIST
-
+    list: state.reducer.LIST,
+    user: state.reducer.USER
   };
 };
 
@@ -140,6 +141,7 @@ const mapDispatchToProps = (dispatch) => {
     actions: bindActionCreators({
       getList,
       deleteJob,
+      logout
     }, dispatch),
   }
 }
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#85d2f5',
     borderRadius: 4,
     padding: 8,
-    marginVertical: 5,
+    marginVertical: 8,
     marginHorizontal: 16,
   },
   title: {
@@ -165,9 +167,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   text: {
-    width: '50%',
+    width: '100%',
     fontSize: 14,
     color: 'grey',
-    textAlign: 'center',
+    paddingLeft: 10,
   }
 });

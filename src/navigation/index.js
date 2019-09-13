@@ -3,9 +3,13 @@ import Login from "../screens/login";
 import Registration from "../screens/registration";
 import List from "../screens/home";
 import Form from "../screens/jobForm";
+import splash from "../screens/splash";
 
 const Navigation = createStackNavigator(
   {
+    Splash: {
+      screen: splash
+    },
     Login: {
       screen: Login,
     },
@@ -20,7 +24,7 @@ const Navigation = createStackNavigator(
     }
   },
   {
-    initialRouteName: "List",
+    initialRouteName: "Splash",
     headerMode: "none",
   }
 )
