@@ -75,7 +75,6 @@ class List extends React.Component {
 
   _remove = (id) => {
     const data = this.props.list;
-    console.log('id***', id, data);
     var index = data.findIndex(item => id === item._id)
     if (index !== -1) {
       this.props.actions.deleteJob(data[index]._id, data);

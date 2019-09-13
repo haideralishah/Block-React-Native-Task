@@ -14,7 +14,6 @@ class LoginForm extends React.Component {
   }
   _Signin = () => {
     const { email, password } = this.state;
-    console.log('user', email, password);
     if (email && password) {
       this.props.actions.signin({ email, password })
         .then(() => {

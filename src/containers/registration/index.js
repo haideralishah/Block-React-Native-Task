@@ -15,7 +15,6 @@ class RegistrationForm extends React.Component {
   }
   _Register = () => {
     const { email, password, name } = this.state;
-    console.log('Email', email, password, name, this.props)
     if (email && password && name) {
       this.props.actions.register({ name, email, password })
         .then(() => {

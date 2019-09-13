@@ -2,7 +2,7 @@ import ActionTypes from '../constant';
 
 const INITIAL_STATE = {
     USER: '',
-    LIST: []
+    LIST: ''
 }
 
 export default (state = INITIAL_STATE, action) => {

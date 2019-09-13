@@ -12,11 +12,9 @@ function fetchFunc(url, data) {
             }
         }).then(res => res.json())
             .then(response => {
-                console.log('Success:', response);
                 res(response);
             })
             .catch(error => {
-                console.error('Error:', error);
                 rej();
             });
     })
@@ -31,7 +29,6 @@ export function authCheck() {
             try {
                 const value = await AsyncStorage.getItem('user');
                 if (value !== null) {
-                    console.log(value);
                     dispatch({ type: ActionTypes.USER, payload: JSON.parse(value) })
                     resolve();
                 }
@@ -39,7 +36,6 @@ export function authCheck() {
                     reject();
                 }
             } catch (error) {
-                console.log(error);
             }
         })
     }
@@ -50,7 +46,6 @@ export function authCheck() {
 export function signin(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            console.log('Register', data);
             var url = 'http://192.168.100.55:5000/user/signIn';
             fetchFunc(url, data)
                 .then((response) => {
@@ -75,7 +70,6 @@ export function signin(data) {
 export function register(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            console.log('Register', data);
             var url = 'http://192.168.100.55:5000/user/register';
             fetchFunc(url, data)
                 .then((response) => {
@@ -100,7 +94,6 @@ export function register(data) {
 export function createJob(data) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            console.log('Create Job', data);
             var url = 'http://192.168.100.55:5000/jobs/add';
             fetchFunc(url, data)
                 .then(() => {
@@ -118,7 +111,6 @@ export function createJob(data) {
 export function getList(id) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            console.log('ID', id);
             var url = `http://192.168.100.55:5000/jobs/get/${id}`;
             fetch(url, {
                 method: 'GET',
@@ -127,12 +119,10 @@ export function getList(id) {
                 }
             }).then(res => res.json())
                 .then(response => {
-                    console.log('Success:', response);
                     dispatch({ type: ActionTypes.LIST, payload: response })
                     resolve({ data: response.length ? response : '' });
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     reject();
                 });
         })
@@ -144,7 +134,6 @@ export function getList(id) {
 export function deleteJob(id, list) {
     return dispatch => {
         return new Promise(function (resolve, reject) {
-            console.log('Delete Id', id, list);
             dispatch({ type: ActionTypes.LIST, payload: list })
             var url = 'http://192.168.100.55:5000/jobs/delete';
             fetch(url, {
@@ -155,12 +144,10 @@ export function deleteJob(id, list) {
                 }
             }).then(res => res.json())
                 .then(response => {
-                    console.log('Success:', response);
                     dispatch({ type: ActionTypes.LIST, payload: list })
                     resolve();
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     reject();
                 });
         })
@@ -174,6 +161,7 @@ export function logout() {
         return new Promise(function (resolve, reject) {
             AsyncStorage.removeItem('user');
             dispatch({ type: ActionTypes.USER, payload: '' })
+            dispatch({ type: ActionTypes.LIST, payload: '' })
             resolve();
         })
     }
